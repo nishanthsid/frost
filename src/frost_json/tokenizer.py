@@ -30,10 +30,14 @@ class Tokenizer:
         for char in self.json_string:
 
             if current_opening_char != [] and current_opening_char[-1] != "\"" and current_aggregated_string == '' and char == "\"":
+                if current_opening_char and current_opening_char[-1] == ",":
+                    current_opening_char.pop()
                 current_opening_char.append(char)
             elif char in self.__OPENING_CHARS:
                 if current_aggregated_string != '':
                     raise SyntaxError("Invalid Literal " + char + ", not allowed here")
+                if current_opening_char and current_opening_char[-1] == ",":
+                    current_opening_char.pop()
                 current_opening_char.append(char)
                 self.token_stream.push_token(Token(TokenType(char),char))
             elif char in self.__CLOSING_CHARS or char == ",":
@@ -42,6 +46,10 @@ class Tokenizer:
                 elif char != ',':
                     if current_opening_char[-1] != self.__OPEN_CLOSE_CHAR_MAPPING[char]:
                         raise SyntaxError("Invalid closing char : " + char + "")
+                elif char == ',':
+                    if current_opening_char and current_opening_char[-1] == "\"":
+                        current_aggregated_string += char
+                        continue
                 if current_aggregated_string == "true" or current_aggregated_string == "false" or current_aggregated_string == "null":
                     self.token_stream.push_token(Token(TokenType(current_aggregated_string.upper()),current_aggregated_string))
                 else:
@@ -62,6 +70,10 @@ class Tokenizer:
                     self.token_stream.push_token(Token(TokenType(char),char))
                 if char != ",":
                     current_opening_char.pop()
+                else:
+                    if current_opening_char and current_opening_char[-1] == ",":
+                        current_opening_char.pop()
+                    current_opening_char.append(",")
             elif char == ":" and current_opening_char[-1] != "\"":
                 if current_aggregated_string != '':
                     raise SyntaxError("Invalid Literal " + char + ", not allowed here")
