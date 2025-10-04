@@ -52,11 +52,10 @@ class Tokenizer:
                     if current_opening_char and current_opening_char[-1] == "\"":
                         current_aggregated_string += char
                         continue
-
+                current_aggregated_string = current_aggregated_string.strip()
                 if current_aggregated_string == "true" or current_aggregated_string == "false" or current_aggregated_string == "null":
                     self.token_stream.push_token(Token(TokenType(current_aggregated_string.upper()),current_aggregated_string))
                 else:
-                    is_num = None
                     try:
                         float(current_aggregated_string)
                         is_num = True
@@ -183,6 +182,7 @@ if __name__ == "__main__":
 }
 
     '''
+
 
     tkniz = Tokenizer(my_json)
     tkniz.build_token_stream()
